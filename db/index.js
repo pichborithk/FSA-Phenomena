@@ -1,4 +1,5 @@
 // Require the Client constructor from the pg package
+const bcrypt = require('bcrypt');
 const { Client } = require('pg');
 
 // Create a constant, CONNECTION_STRING, from either process.env.DATABASE_URL or postgres://localhost:5432/phenomena-dev
@@ -63,7 +64,9 @@ async function getOpenReports() {
 async function createReport(reportFields) {
   // Get all of the fields from the passed in object
   const { title, location, description, password } = reportFields;
+  const salt = await bcrypt.genSalt(Number(process.env.SALT));
 
+  const hash = await bcrypt.hash(password, salt);
   try {
     // insert the correct fields into the reports table
     // remember to return the new row from the query
@@ -73,7 +76,7 @@ async function createReport(reportFields) {
       VALUES ($1, $2, $3, $4)
       RETURNING *;
       `,
-      [title, location, description, password]
+      [title, location, description, hash]
     );
     // remove the password from the returned row
     const [report] = rows;
@@ -165,7 +168,9 @@ async function closeReport(reportId, password) {
       throw Error('Report does not exist with that id');
     }
     // If the passwords don't match, throw an error
-    if (report.password !== password) {
+    const isValidated = await bcrypt.compare(password, report.password);
+
+    if (!isValidated) {
       throw Error('Password incorrect for this report, please try again');
     }
     // If it has already been closed, throw an error with a useful message
@@ -242,16 +247,25 @@ async function createReportComment(reportId, commentFields) {
       [reportId, content]
     );
     // then update the expiration date to a day from now
-    let newExpirationDate = new Date();
-    newExpirationDate.setDate(newExpirationDate.getDate() + 1);
+    // let newExpirationDate = new Date();
+    // newExpirationDate.setDate(newExpirationDate.getDate() + 1);
+
+    // await client.query(
+    //   `
+    //   UPDATE reports
+    //   SET "expirationDate"=$2
+    //   WHERE id=$1
+    //   `,
+    //   [reportId, newExpirationDate]
+    // );
 
     await client.query(
       `
       UPDATE reports
-      SET "expirationDate"=$2
+      SET "expirationDate"= CURRENT_TIMESTAMP + interval '1 day'
       WHERE id=$1
       `,
-      [reportId, newExpirationDate]
+      [reportId]
     );
     // finally, return the comment
     return comment;
