@@ -6,7 +6,7 @@ const {
   createReport,
   closeReport,
   getOpenReports,
-  createReportComment
+  createReportComment,
 } = require('./index');
 
 /**
@@ -16,7 +16,7 @@ const {
 async function dropTables() {
   try {
     console.log('Starting to drop tables...');
-    
+
     client.query(`
       DROP TABLE IF EXISTS comments;
       DROP TABLE IF EXISTS reports;
@@ -69,7 +69,6 @@ async function buildTables() {
  */
 async function rebuildDB() {
   try {
-
     await dropTables();
     await buildTables();
   } catch (error) {
@@ -87,30 +86,34 @@ async function createInitialReports() {
     const reportOne = await createReport({
       title: 'ET spotted outside of Area 51',
       location: 'Roswell, NM',
-      description: 'I saw what can only be described as a very slender, very tall humanoid walking behind the fences at...',
-      password: '51isTheKey'
+      description:
+        'I saw what can only be described as a very slender, very tall humanoid walking behind the fences at...',
+      password: '51isTheKey',
     });
 
     const reportTwo = await createReport({
       title: 'Fairy lights in my backyard',
       location: 'Utica, NY',
-      description: 'I saw floating lights in my backyard... on inspection they weren\'t fireflies...',
-      password: 'iLoveF4ri3s'
+      description:
+        "I saw floating lights in my backyard... on inspection they weren't fireflies...",
+      password: 'iLoveF4ri3s',
     });
 
     const reportThree = await createReport({
-      title: 'Corner of metal object sticking up out of the ground in the woods...',
+      title:
+        'Corner of metal object sticking up out of the ground in the woods...',
       location: 'Haven, Maine',
-      description: 'Late last night and the night before\n Tommyknockers, Tommyknockers\n knocking at the door',
-      password: 'kingwasright'
-    })
+      description:
+        'Late last night and the night before\n Tommyknockers, Tommyknockers\n knocking at the door',
+      password: 'kingwasright',
+    });
 
     console.log('Success creating reports!');
 
-    return [reportOne, reportTwo, reportThree]
+    return [reportOne, reportTwo, reportThree];
   } catch (error) {
     console.error('Error while creating reports!');
-    throw (error);
+    throw error;
   }
 }
 
@@ -121,42 +124,49 @@ async function createInitialComments(initialReports) {
   const [reportOne, reportTwo] = initialReports;
 
   try {
-    console.log("Trying to create comments...");
+    console.log('Trying to create comments...');
 
     const commentOne = await createReportComment(reportOne.id, {
-      content: "I saw that, too... let's meet up to discuss"
+      content: "I saw that, too... let's meet up to discuss",
     });
 
     const commentTwo = await createReportComment(reportTwo.id, {
-      content: "Look, I believe in a lot of things but are fairy lights even real?"
-    });
-    
-    const commentThree = await createReportComment(reportTwo.id, {
-      content: "Hey, don't question the report. Question the government! They've been lying to us all these years."
+      content:
+        'Look, I believe in a lot of things but are fairy lights even real?',
     });
 
-    console.log("Success creating comments!");
+    const commentThree = await createReportComment(reportTwo.id, {
+      content:
+        "Hey, don't question the report. Question the government! They've been lying to us all these years.",
+    });
+
+    console.log('Success creating comments!');
 
     return [commentOne, commentTwo, commentThree];
-  } catch(error) {
-    console.log("Failure creating comments!")
+  } catch (error) {
+    console.log('Failure creating comments!');
     throw error;
   }
 }
 
 /**
  * Function made to forcefully expire a report, only for testing.
- * 
+ *
  * This would not be necessary for our DB Adapter
  */
 async function expireReport(reportId) {
   try {
-    const { rows: [report] } = await client.query(`
+    const {
+      rows: [report],
+    } = await client.query(
+      `
       UPDATE reports
       SET "expirationDate" = CURRENT_TIMESTAMP - interval '2 days'
       WHERE id=$1
       RETURNING *;
-    `, [reportId]);
+    `,
+      [reportId]
+    );
 
     return report;
   } catch (error) {
@@ -170,29 +180,32 @@ async function expireReport(reportId) {
  */
 async function testDB() {
   try {
-    console.log("Filling DB with initial data");
-    
+    console.log('Filling DB with initial data');
+
     const reports = await createInitialReports();
     await createInitialComments(reports);
-    
-    console.log("Filled! Now executing basic commands...")
+
+    console.log('Filled! Now executing basic commands...');
 
     /* These lines should always work */
-    console.log("Getting open reports:\n", await getOpenReports());
-    console.log("Closing report with id 1 with correct password", await closeReport(1, "51isTheKey"));
-    console.log("Expiring report with id 3", await expireReport(3));
-    console.log("Grabbing all open reports:\n", await getOpenReports());
-    
+    console.log('Getting open reports:\n', await getOpenReports());
+    console.log(
+      'Closing report with id 1 with correct password',
+      await closeReport(1, '51isTheKey')
+    );
+    console.log('Expiring report with id 3', await expireReport(3));
+    console.log('Grabbing all open reports:\n', await getOpenReports());
+
     /* Each of these lines should throw an error when uncommented */
-    
+
     // console.log("Closing report with id 1 even though it is closed", await closeReport(1, "51isTheKey"));
     // console.log("Closing report with id 2 with incorrect password", await closeReport(2, "bad password"));
     // console.log("Closing report with id 300 even though it doesn't exist", await closeReport(300, "does not matter"));
     // console.log("Commenting on closed report", await createReportComment(1, { content: "should we meet up and chat?" }));
-    // console.log("Commenting on expired report", await createReportComment(3, { content: "you read too much" })); 
+    // console.log("Commenting on expired report", await createReportComment(3, { content: "you read too much" }));
     // console.log("Creating report with missing info", await createReport({ title: "abc", location: "abc", description: "abc" }));
 
-    console.log("Finished filling DB!");
+    console.log('Finished filling DB!');
   } catch (error) {
     throw error;
   }
@@ -200,5 +213,5 @@ async function testDB() {
 
 module.exports = {
   rebuildDB,
-  testDB
-}
+  testDB,
+};

@@ -242,13 +242,16 @@ async function createReportComment(reportId, commentFields) {
       [reportId, content]
     );
     // then update the expiration date to a day from now
+    let newExpirationDate = new Date();
+    newExpirationDate.setDate(newExpirationDate.getDate() + 1);
+
     await client.query(
       `
       UPDATE reports
       SET "expirationDate"=$2
       WHERE id=$1
       `,
-      [reportId, new Date()]
+      [reportId, newExpirationDate]
     );
     // finally, return the comment
     return comment;
