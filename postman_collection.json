@@ -1,0 +1,208 @@
+{
+	"info": {
+		"_postman_id": "b4cf92c3-07b3-4369-90cb-8aae14ad6c2a",
+		"name": "Phenomena",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25172492"
+	},
+	"item": [
+		{
+			"name": "Get all reports",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/api/reports",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"reports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add report",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = JSON.parse(responseBody);",
+							"",
+							"if(responseData){",
+							"    console.log('Set report id')",
+							"pm.collectionVariables.set(\"reportId\", responseData.id);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"{{$randomLoremWords}}\",\n    \"location\": \"{{$randomCity}}\",\n    \"description\": \"{{$randomLoremSentence}}\",\n    \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/reports",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"reports"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete report",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseData = JSON.parse(responseBody);",
+							"",
+							"if(responseData){",
+							"    console.log('Remove report id')",
+							"pm.collectionVariables.unset(\"reportId\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"password\": \"{{password}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/reports/:reportId",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"reports",
+						":reportId"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "reportId",
+							"value": "{{reportId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add comment",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"content\": \"{{$randomLoremSentence}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/reports/:reportId/comments",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"reports",
+						":reportId",
+						"comments"
+					],
+					"variable": [
+						{
+							"key": "reportId",
+							"value": "{{reportId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "reportId",
+			"value": ""
+		}
+	]
+}
