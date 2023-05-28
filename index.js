@@ -17,6 +17,10 @@ const cors = require('cors');
 server.use(cors());
 // Have the server use bodyParser.json()
 server.use(bodyParser.json());
+
+server.get('/', (req, res) => {
+  res.status(200).send('<h1>Welcome to Project Phenomena</h1>');
+});
 // Have the server use your api router with prefix '/api'
 server.use('/api', require('./api'));
 // Import the client from your db/index.js
